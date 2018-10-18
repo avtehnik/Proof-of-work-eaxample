@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="materialize/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <style>
+        textarea,
+        input {
+            font-size: 40px!important;
+        }
+    </style>
+
+</head>
+<body>
+
+<div class="section no-pad-bot" id="index-banner">
+    <div class="container">
+        <br><br>
+
+        <h1 class="header center orange-text">Mining explanation</h1>
+
+        <div class="row center">
+            <div id="app">
+                <div class="row">
+                    <div class="row">
+                        <div class="input-field col s12">
+                            <textarea v-model="transactions" id="transactions-el" class="materialize-textarea"></textarea> <label for="transactions-el">Transactions</label>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="input-field col s6">
+                            <input id="difficulty-el" v-model="difficulty" type="number"> <label for="difficulty-el">Difficulty</label>
+                        </div>
+                        <div class="input-field col s6">
+                            <input v-model="nonce" id="nonce-el" type="number"> <label for="nonce-el">Nonce</label>
+                        </div>
+                    </div>
+                </div>
+
+                <h4>sha256( {{nonce}} + sha256(Transactions) ) = </h4>
+                <h4>{{hash}}</h4>
+                <h4>Iterations: {{difference}}</h4>
+                <button class="btn-large waves-effect waves-light orange"  @click="onMine()">Mine</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+<script src="materialize/materialize.min.js"></script>
+
+<script src="js/vue.min.js"></script>
+<script src="js/sha3.min.js"></script>
+<script>
+
+
+    new Vue({
+        el: "#app",
+        data: {
+            difference: 0,
+            difficulty: 3,
+            nonce: 1,
+            transactions: "Transaction 1\nTransaction 2 \nTransaction 3 \nTransaction 4",
+            hash: "00067964de3a660852580e57f8cd10c00a75634e2b3ad975c5fb970033c725d7"
+        },
+        methods: {
+            onMine: function (message) {
+
+
+                var lastNonce = this.nonce;
+
+                this.nonce++;
+                this.hash = this.getHash();
+
+                // console.log(this.hash.substring(0, this.difficulty));
+                while (this.hash.substring(0, this.difficulty) != '0'.repeat(this.difficulty) && this.nonce < 10000000) {
+                    this.nonce++;
+                    this.difference = this.nonce - lastNonce;
+                    this.hash = this.getHash();
+
+                }
+            },
+
+            getHash: function () {
+
+                return sha3_256(this.nonce + "" + this.transactions);
+
+            },
+
+            hashFunction: function (input) {
+                var hash = 0;
+                if (input.length == 0) {
+                    return hash;
+                }
+                for (var i = 0; i < input.length; i++) {
+                    var char = input.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; // Convert to 32bit integer
+                }
+                return hash;
+            }
+        }
+    })
+</script>
+</body>
+</html>
